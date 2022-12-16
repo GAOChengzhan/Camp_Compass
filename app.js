@@ -3,6 +3,8 @@ const express = require('express');
 const path = require('path')
 const ejsMate = require('ejs-mate');
 const Joi = require('joi');
+const Review = require('./models/review')
+const {campgroundSchema,reviewSchema} = require('./schema.js');
 const catchAsync = require('./utils/catchAsync');
 const ExpressError = require('./utils/ExpressError');
 const Campground = require('./models/campground');
@@ -37,28 +39,36 @@ app.get('/campgrounds',catchAsync(async (req,res)=>{
 }));
 // MAIN ********************************************************************************
 
-// ADD NEW ******************************************************************************
+// Middleware Function******************************************************************
+const validateCampground =(req,res,next)=>{
+    const {error} = campgroundSchema.validate(req.body);
+    if (error){
+        const msg = error.details.map(el=>el.message).join(',');
+        throw new ExpressError(msg,400);
+    }
+    else{
+        next();
+    }
+}
+const validateReview =(req,res,next)=>{
+    const {error} = reviewSchema.validate(req.body);
+    if (error){
+        const msg = error.details.map(el=>el.message).join(',');
+        throw new ExpressError(msg,400);
+    }
+    else{
+        next();
+    }
+}
+// Middleware Function******************************************************************
+
+// ADD NEW *****************************************************************************
 app.get('/campgrounds/new',(req,res)=>{
     res.render('campgrounds/new');
 });
 
-app.post('/campgrounds', catchAsync(async (req,res,next)=>{
+app.post('/campgrounds', validateCampground, catchAsync(async (req,res,next)=>{
     // if(!req.body.Campground) throw new ExpressError("Invalid Campground Data",400);
-    //define basic schema
-    const campgroundSchema = Joi.object({
-        campground:Joi.object({
-            title:Joi.string().required(),
-            price:Joi.number().required().min(0),
-            image: Joi.string().required(),
-            description: Joi.string().required(),
-            location: Joi.string().required(),
-        }).required()
-
-    })
-    const results = campgroundSchema.validate(req.body);
-    if (results.error){
-        throw new ExpressError();
-    }
     const newCampground = new Campground(req.body.campground);
     await newCampground.save();
     res.redirect(`/campgrounds/${newCampground._id}`);
@@ -78,7 +88,7 @@ app.get('/campgrounds/:id/edit',catchAsync(async(req,res)=>{
     res.render('campgrounds/edit',{campground});
 }));
 
-app.put('/campgrounds/:id',catchAsync(async (req,res)=>{
+app.put('/campgrounds/:id',validateCampground, catchAsync(async (req,res)=>{
     const {id}=req.params;
     const campground = await Campground.findByIdAndUpdate(id,{...req.body.campground});
     res.redirect(`/campgrounds/${campground._id}`);
@@ -93,6 +103,16 @@ app.delete('/campgrounds/:id',catchAsync(async (req,res)=>{
 }));
 // DELETE *******************************************************************************
 
+// Add Review ***************************************************************************
+app.post('/campgrounds/:id/reviews',validateReview,catchAsync(async(req,res)=>{
+    const campground = await Campground.findById(req.params.id);
+    const review = new Review(req.body.review)
+    campground.reviews.push(review);
+    await review.save();
+    await campground.save();
+    res.redirect(`/campgrounds/${campground._id}`)
+}))
+// Add Review ***************************************************************************
 
 app.all('*',(req,res,next)=>{
     next(new ExpressError('Page not Found',404))
