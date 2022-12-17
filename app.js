@@ -3,12 +3,22 @@ const express = require('express');
 const path = require('path')
 const ejsMate = require('ejs-mate');
 const Joi = require('joi');
-const flash = require('connect-flash');//flash
-const session = require('express-session');//Session
 const ExpressError = require('./utils/ExpressError');//ErrorHandler
 const methodOverride = require('method-override');
+
+//flash and Session
+const flash = require('connect-flash');//flash
+const session = require('express-session');//Session
+
+//Passport
+const passport = require('passport');
+const LocalStrategy = require('passport-local');
+const User =require('./models/user');
+
+//Routes
 const campgroundsRoutes =require('./routes/campground');//campgroundRoutes
 const reviewRoutes = require('./routes/review');//reviewRoutes
+const userRoutes = require('./routes/user');
 
 mongoose.connect('mongodb://localhost:27017/yelp-camp',{
     useNewUrlParser: true,
@@ -25,10 +35,12 @@ db.once("open",()=>{
 });
 //connect to mongoose********************************************************************
 
+// Configuation *************************************************************************
 const app = express();
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname,'public')));//serve public assets
+// Configuation *************************************************************************
 
 // Session & Flash***********************************************************************
 
@@ -43,13 +55,25 @@ const sessionConfig ={
     }
 }
 app.use(session(sessionConfig));
-app.use(flash);
+app.use(flash());
 app.use((req,res,next)=>{
     res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
     next();
 })
 
 // Session & Flash***********************************************************************
+
+
+// Passport *****************************************************************************
+app.use(passport.initialize());//initialize passport
+app.use(passport.session());//persistent login sessions
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+// Passport *****************************************************************************
+
 
 // EJS **********************************************************************************
 app.engine('ejs',ejsMate);
@@ -58,8 +82,10 @@ app.set('views',path.join(__dirname,'views'));
 // EJS **********************************************************************************
 
 //Routes ********************************************************************************
+app.use('/',userRoutes);
 app.use('/campgrounds',campgroundsRoutes);
 app.use('/campgrounds/:id/reviews/',reviewRoutes);
+
 app.get('/',(req,res)=>{
     res.render('home')
 })
