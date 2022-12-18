@@ -41,6 +41,7 @@ const app = express();
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname,'public')));//serve public assets
+
 // Configuation *************************************************************************
 
 // EJS **********************************************************************************
@@ -74,7 +75,7 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{
-    // console.log(req.session);
+    console.log(req.user);
     res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');

@@ -17,7 +17,7 @@ router.post('/register',catchAsync(async(req,res)=>{
                 return next(err);
             }
             else{
-                req.flash('success','Registered Successfully! Welcome to Camp, '+username+'!');
+                req.flash('success','Registered successfully! Welcome to Camp, '+username+'!');
                 res.redirect('/campgrounds');
             }
         })
@@ -33,11 +33,12 @@ router.get('/login',(req,res)=>{
     res.render('users/login');
 })
 router.post('/login',
-    passport.authenticate('local',{failureFlash:true,failureRedirect:'/login'}),
+    passport.authenticate('local',{failureFlash:true,failureRedirect:'/login',keepSessionInfo:true}),
     (req,res)=>{
-        req.flash('success','Welcome Back, '+req.body.username+'!');
-        const redirectUrl = req.session.returnTo || '/campgrounds';
+        req.flash('success','Welcome back, '+req.body.username+'!');
         console.log(req.session);
+        const redirectUrl = req.session.returnTo || '/campgrounds';
+        
         delete req.session.returnTo;
         res.redirect(redirectUrl);
     })
@@ -48,7 +49,7 @@ router.get('/logout',(req,res)=>{
             return next(err);
         }
         else{
-        req.flash('success',"Logged Out Successfully!");
+        req.flash('success',"Logged out successfully!");
         res.redirect('/campgrounds');
         }
     });
