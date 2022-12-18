@@ -11,6 +11,7 @@ const flash = require('connect-flash');//flash
 const session = require('express-session');//Session
 
 //Passport
+const cookieParser = require('cookie-parser')
 const passport = require('passport');
 const LocalStrategy = require('passport-local');
 const User =require('./models/user');
@@ -42,28 +43,29 @@ app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname,'public')));//serve public assets
 // Configuation *************************************************************************
 
-// Session & Flash***********************************************************************
+// EJS **********************************************************************************
+app.engine('ejs',ejsMate);
+app.set('view engine','ejs');
+app.set('views',path.join(__dirname,'views'));
+// EJS **********************************************************************************
 
+// Session & Flash***********************************************************************
+// app.use(cookieParser('foo'));
 const sessionConfig ={
     secret: "secret",
+    name:"session",
     resave: false,
     saveUninitialized: true,
     cookie:{
         httpOnly:true,// Security
+        // secure: false,
         expires: Date.now() + 1000*60*60*24*7,
         maxAge:1000*60*60*24*7,
     }
 }
 app.use(session(sessionConfig));
 app.use(flash());
-app.use((req,res,next)=>{
-    res.locals.success = req.flash('success');
-    res.locals.error = req.flash('error');
-    next();
-})
-
 // Session & Flash***********************************************************************
-
 
 // Passport *****************************************************************************
 app.use(passport.initialize());//initialize passport
@@ -71,15 +73,14 @@ app.use(passport.session());//persistent login sessions
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-
+app.use((req,res,next)=>{
+    // console.log(req.session);
+    res.locals.currentUser = req.user;
+    res.locals.success = req.flash('success');
+    res.locals.error = req.flash('error');
+    next();
+})
 // Passport *****************************************************************************
-
-
-// EJS **********************************************************************************
-app.engine('ejs',ejsMate);
-app.set('view engine','ejs');
-app.set('views',path.join(__dirname,'views'));
-// EJS **********************************************************************************
 
 //Routes ********************************************************************************
 app.use('/',userRoutes);

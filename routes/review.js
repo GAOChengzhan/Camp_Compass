@@ -5,7 +5,7 @@ const Campground = require('../models/campground');
 const {reviewSchema} = require('../schema.js');
 const catchAsync = require('../utils/catchAsync');
 const ExpressError = require('../utils/ExpressError');
-
+const {isLoggedIn} = require('../utils/isLoggedIn');
 
 // Middleware Function*******************************************************************
 const validateReview =(req,res,next)=>{
@@ -21,7 +21,7 @@ const validateReview =(req,res,next)=>{
 // Middleware Function*******************************************************************
 
 // Add Review ***************************************************************************
-router.post('/',validateReview,catchAsync(async(req,res)=>{
+router.post('/',isLoggedIn,validateReview,catchAsync(async(req,res)=>{
     const campground = await Campground.findById(req.params.id);
     const review = new Review(req.body.review)
     campground.reviews.push(review);
@@ -33,7 +33,7 @@ router.post('/',validateReview,catchAsync(async(req,res)=>{
 // Add Review ***************************************************************************
 
 // Delete Review ************************************************************************
-router.delete('/:reviewID', catchAsync(async(req,res,next)=>{
+router.delete('/:reviewID', isLoggedIn,catchAsync(async(req,res,next)=>{
     const {id,reviewID}=req.params;
     await Campground.findByIdAndUpdate(id,{$pull:{reviews:reviewID}});
     await Review.findByIdAndDelete(reviewID);
