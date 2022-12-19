@@ -6,25 +6,21 @@ const {isLoggedIn,isAuthor,doesExist,validateCampground} =
                     require('../utils/middlewareFunc');
 const campgroundsVC = require('../controllers/campgroundsViewController');
 // MAIN ********************************************************************************
-router.get('/',catchAsync(campgroundsVC.index));
+router.route('/')
+    .get(catchAsync(campgroundsVC.index))
+    .post(isLoggedIn, validateCampground, catchAsync(campgroundsVC.createCampground));
 
 // ADD NEW *****************************************************************************
 router.get('/new',isLoggedIn,campgroundsVC.renderNewForm);
-router.post('/', isLoggedIn,validateCampground, 
-            catchAsync(campgroundsVC.createCampground));
 
 // SHOW *********************************************************************************
-router.get('/:id',doesExist,catchAsync(campgroundsVC.showCampground));
-
+router.route('/:id')
+    .get(doesExist,catchAsync(campgroundsVC.showCampground))
+    .put(doesExist,isLoggedIn,isAuthor,
+        validateCampground, catchAsync(campgroundsVC.editCampground))
+    .delete(doesExist,isLoggedIn,isAuthor,catchAsync(campgroundsVC.deleteCampground));
 // UPDATE *******************************************************************************
 router.get('/:id/edit',doesExist,isLoggedIn,
             isAuthor,catchAsync(campgroundsVC.renderEditForm));
-
-router.put('/:id',doesExist,isLoggedIn,isAuthor,
-            validateCampground, catchAsync(campgroundsVC.editCampground));
-
-// DELETE *******************************************************************************
-router.delete('/:id',doesExist,isLoggedIn,isAuthor,
-                catchAsync(campgroundsVC.deleteCampground));
 // Export *******************************************************************************
 module.exports = router;
