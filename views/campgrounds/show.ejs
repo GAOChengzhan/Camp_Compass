@@ -1,4 +1,5 @@
 <% layout('layouts/boilerplate')%>
+<link rel="stylesheet" href="/stylesheet/stars.css">
 <div class="row">
     <div class="col-6 mb-3">
         <div class="card">
@@ -31,27 +32,43 @@
       <div class="mb-3">
         
         
-          <h3>Review</h3>
+        <h3>Review</h3>
         <% if (!currentUser) { %>
           <p class="fs-5 text-muted">Sign in to leave and see reviews!</p>
         <% } %> 
+        
         <form action="/campgrounds/<%= campground._id %>/reviews " method="POST" novalidate class="validated-form">
-          <div class="mb-3">
-            <label class="form-label" for="rating">Rating</label>
-            <input class="form-range" type="range" min="1" max="5" name="review[rating]" id="rating">
+          <label class="form-label" for="rating">Rating</label>
+          <div class="mb-0">
+            <fieldset class="starability-basic">
+              <input type="radio" id="no-rate" class="input-no-rate" name="review[rating]" value="0" checked aria-label="No rating." />
+              <input type="radio" id="first-rate1" name="review[rating]" value="1" />
+              <label for="first-rate1" title="Terrible">1 star</label>
+              <input type="radio" id="first-rate2" name="review[rating]" value="2" />
+              <label for="first-rate2" title="Not good">2 stars</label>
+              <input type="radio" id="first-rate3" name="review[rating]" value="3" />
+              <label for="first-rate3" title="Average">3 stars</label>
+              <input type="radio" id="first-rate4" name="review[rating]" value="4" />
+              <label for="first-rate4" title="Very good">4 stars</label>
+              <input type="radio" id="first-rate5" name="review[rating]" value="5" />
+              <label for="first-rate5" title="Amazing">5 stars</label>
+            </fieldset>
           </div>
-          <div class="mb-3">
+          <div class="mt-0 mb-3">
             <label class = "form-label" for = "body">Review</label>
             <textarea class = "form-control" name="review[body]" id="body" cols="30" rows =4 required></textarea>
             <div class="invalid-feedback">
               Please provide a review body.
             </div>
           </div>
-          <% if (currentUser) { %>
-            <button class="btn btn-success">Submit</button>
-          <% } else { %>
-            <button class="btn btn-success" disabled>Submit</button>
-          <% } %> 
+          <div class="mt-1 mb-3">
+            <% if (currentUser) { %>
+              <button class="btn btn-success">Submit</button>
+            <% } else { %>
+              <button class="btn btn-success" disabled>Submit</button>
+            <% } %> 
+          </div>
+
 
         </form>
       </div>
@@ -60,7 +77,10 @@
         <% for(let review of campground.reviews) { %>
           <div class="card mb-3">
             <div class="card-body">
-              <h5 class="card-title">Rating: <%= review.rating%></h5>
+              <!-- <h5 class="card-title"></h5> -->
+              <p class="starability-result" data-rating="<%=review.rating%>">
+              Rated: <%= review.rating%> stars
+              </p>
               <p class="card-text fs-5">Review: <%= review.body %></p>
               <p class="card-text fs-6 text-muted text-end">Submitted by: <%= review.author.username %></p>
               <% if (currentUser && review.author.equals(currentUser._id)) { %>

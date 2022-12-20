@@ -1,5 +1,6 @@
 const Campground = require('../models/campground');
 const {campgroundSchema} = require('../schema.js');
+
 module.exports.index = async (req,res)=>{
     const campgrounds =await Campground.find({});
     res.render('campgrounds/index',{campgrounds});

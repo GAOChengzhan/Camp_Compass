@@ -4,11 +4,9 @@ const router = express.Router();
 const catchAsync = require('../utils/catchAsync');
 const userVC = require('../controllers/userViewController')
 
-router.get('/register',userVC.renderRegister)
-router.post('/register',catchAsync(userVC.userRegister));
+router.route('/register').get(userVC.renderRegister).post(catchAsync(userVC.userRegister));
 
-router.get('/login',userVC.renderLogin)
-router.post('/login',
+router.route('/login').get(userVC.renderLogin).post(
     passport.authenticate('local',{failureFlash:true,failureRedirect:'/login',keepSessionInfo:true}),
     userVC.userLogin)
 

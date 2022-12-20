@@ -9,12 +9,12 @@ const CampgroundSchema = new Schema({
     description: String,
     location: String,
     author:{
-        type:Schema.Types.ObjectId,
+        type:mongoose.Types.ObjectId,
         ref:'User',
     },
     reviews:[
         {
-            type:Schema.Types.ObjectId,
+            type:mongoose.Types.ObjectId,
             ref:'Review',
         }
     ]

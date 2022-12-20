@@ -7,11 +7,7 @@ const ExpressError = require('./ExpressError');
 module.exports.isLoggedIn = (req,res,next)=>{
     if(!req.isAuthenticated()){
         req.session.returnTo=req.originalUrl;//store to session
-        // if(){
-        //     req.session.returnTo
-        // }
-        req.session.save();
-        console.log(req.session);
+        // req.session.save();
         req.flash('error','Please sign in first!');
         return res.redirect('/login');
     }
@@ -54,12 +50,12 @@ module.exports.doesExist = async(req,res,next)=>{
     const campground = await Campground.findById(req.params.id).populate({
         path:'reviews',
         populate:{
-            path:'author',
+            path:'author'
         }
     }).populate('author');
     if(!campground){
         req.flash('error','Cannot find the campground!');
-        res.redirect('/campgrounds');
+        return res.redirect('/campgrounds');
     }
     req.info=campground;
     next();
