@@ -6,17 +6,14 @@ const {isLoggedIn,isAuthor,doesExist,validateCampground} =
                     require('../utils/middlewareFunc');
 const campgroundsVC = require('../controllers/campgroundsViewController');
 const multer = require('multer');
-const upload = multer({dest:'uploads/'})
+const {storage} =require('../cloudinary');
+const upload = multer({storage:storage,});
 
 // MAIN ********************************************************************************
 router.route('/')
 .get(catchAsync(campgroundsVC.index))
-.post(upload.array('campground[image]'),(req,res)=>{
-    console.log(req.body,req.file);
-    res.send("It worked!");
-})
-
-// .post(isLoggedIn, validateCampground, catchAsync(campgroundsVC.createCampground));
+.post(isLoggedIn, upload.array('image'), validateCampground,
+    catchAsync(campgroundsVC.createCampground));
 
 // ADD NEW *****************************************************************************
 router.get('/new',isLoggedIn,campgroundsVC.renderNewForm);
@@ -24,7 +21,7 @@ router.get('/new',isLoggedIn,campgroundsVC.renderNewForm);
 // SHOW *********************************************************************************
 router.route('/:id')
 .get(doesExist,catchAsync(campgroundsVC.showCampground))
-.put(doesExist,isLoggedIn,isAuthor,validateCampground, catchAsync(campgroundsVC.editCampground))
+.put(doesExist,isLoggedIn,isAuthor,upload.array('image'),validateCampground, catchAsync(campgroundsVC.editCampground))
 .delete(doesExist,isLoggedIn,isAuthor,catchAsync(campgroundsVC.deleteCampground));
 // UPDATE *******************************************************************************
 router.get('/:id/edit',doesExist,isLoggedIn,isAuthor,catchAsync(campgroundsVC.renderEditForm));
