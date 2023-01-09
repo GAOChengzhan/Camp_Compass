@@ -1,5 +1,7 @@
 const Campground = require('../models/campground');
-const {campgroundSchema} = require('../schema.js');
+const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
+const mapBoxToken = process.env.MAPBOX_TOKEN;
+const geoCoder = mbxGeocoding({accessToken:mapBoxToken});
 const { cloudinary } = require("../cloudinary");
 
 module.exports.index = async (req,res)=>{
@@ -11,7 +13,13 @@ module.exports.renderNewForm=(req,res)=>{
 }
 module.exports.createCampground = async (req,res,next)=>{
     // if(!req.body.Campground) throw new ExpressError("Invalid Campground Data",400);
+    const geoData = await geoCoder.forwardGeocode({
+        query: req.body.campground.location,
+        limit: 1
+    }).send()
+    // res.sned(geoData.body.features[0].geometry.coordinates);
     const newCampground = new Campground(req.body.campground);
+    newCampground.geometry = geoData.body.features[0].geometry;
     newCampground.images = req.files.map(f=>({url:f.path,fileName:f.fileName}));
     newCampground.author = req.user._id;
     await newCampground.save();

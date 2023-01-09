@@ -7,7 +7,7 @@ cloudinary.config({
     api_secret:process.env.COULD_SECRET,
 
 })
-console.log(process.env.COULD_NAME,process.env.COULD_API_KEY,process.env.COULD_SECRET)
+console.log(process.env.MAPBOX_TOKEN)
 const storage = new CloudinaryStorage({
     cloudinary,
     params: {

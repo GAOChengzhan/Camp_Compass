@@ -23,6 +23,7 @@ const extension = (joi) => ({
 
 const Joi = BaseJoi.extend(extension)
 //define basic schema
+
 module.exports.campgroundSchema = Joi.object({
     campground: Joi.object({
         title: Joi.string().required().escapeHTML(),

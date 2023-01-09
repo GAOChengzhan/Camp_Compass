@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@mapbox/mapbox-sdk": "^0.14.0",
     "bootstrap": "^5.2.2",
     "cloudinary": "^1.33.0",
     "connect-flash": "^0.1.1",
