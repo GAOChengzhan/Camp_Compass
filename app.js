@@ -2,17 +2,20 @@ if (process.env.NODE_ENV !== "production") {
     require('dotenv').config();
 }
 const mongoose = require('mongoose');
+const dbURL = process.env.DB_URL;
 const express = require('express');
 const path = require('path')
 const ejsMate = require('ejs-mate');
 const Joi = require('joi');
 const ExpressError = require('./utils/ExpressError');//ErrorHandler
 const methodOverride = require('method-override');
+const mongoSanitize = require('express-mongo-sanitize');
 
 //flash and Session
 const flash = require('connect-flash');//flash
 const session = require('express-session');//Session
-
+const helmet = require('helmet');
+const MongoDBStore = require('connect-mongo')(session);
 //Passport
 const cookieParser = require('cookie-parser')
 const passport = require('passport');
@@ -24,7 +27,7 @@ const campgroundsRoutes =require('./routes/campground');//campgroundRoutes
 const reviewRoutes = require('./routes/review');//reviewRoutes
 const userRoutes = require('./routes/user');
 
-mongoose.connect('mongodb://localhost:27017/yelp-camp',{
+mongoose.connect(dbURL,{
     useNewUrlParser: true,
     useUnifiedTopology: true ,
     // useCreateIndex:true,
@@ -44,7 +47,16 @@ const app = express();
 app.use(express.urlencoded({extended:true}));
 app.use(methodOverride('_method'));
 app.use(express.static(path.join(__dirname,'public')));//serve public assets
-
+app.use(mongoSanitize());
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
+const store = new MongoDBStore({
+    url: dbURL,
+    secret,
+    touchAfter: 24 * 60 * 60
+});
+store.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e)
+})
 // Configuation *************************************************************************
 
 // EJS **********************************************************************************
@@ -56,6 +68,7 @@ app.set('views',path.join(__dirname,'views'));
 // Session & Flash***********************************************************************
 // app.use(cookieParser('foo'));
 const sessionConfig ={
+    store,
     secret: "secret",
     name:"session",
     resave: false,
@@ -69,6 +82,7 @@ const sessionConfig ={
 }
 app.use(session(sessionConfig));
 app.use(flash());
+
 // Session & Flash***********************************************************************
 
 // Passport *****************************************************************************
@@ -78,7 +92,6 @@ passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 app.use((req,res,next)=>{
-    // console.log(req.user);
     res.locals.currentUser = req.user;
     res.locals.success = req.flash('success');
     res.locals.error = req.flash('error');
