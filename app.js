@@ -2,7 +2,7 @@ if (process.env.NODE_ENV !== "production") {
     require('dotenv').config();
 }
 const mongoose = require('mongoose');
-const dbURL = process.env.DB_URL;
+const dbURL = process.env.DB_URL|| 'mongodb://localhost:3000/yelp-camp';
 const express = require('express');
 const path = require('path')
 const ejsMate = require('ejs-mate');
@@ -15,7 +15,7 @@ const mongoSanitize = require('express-mongo-sanitize');
 const flash = require('connect-flash');//flash
 const session = require('express-session');//Session
 const helmet = require('helmet');
-const MongoDBStore = require('connect-mongo')(session);
+
 //Passport
 const cookieParser = require('cookie-parser')
 const passport = require('passport');
@@ -26,6 +26,9 @@ const User =require('./models/user');
 const campgroundsRoutes =require('./routes/campground');//campgroundRoutes
 const reviewRoutes = require('./routes/review');//reviewRoutes
 const userRoutes = require('./routes/user');
+
+
+const MongoDBStore = require('connect-mongo')(session);
 
 mongoose.connect(dbURL,{
     useNewUrlParser: true,
