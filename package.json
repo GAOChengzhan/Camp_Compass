@@ -5,10 +5,11 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app"
   },
   "engines": {
-    "node": "18.12.0"
+    "node": "18.12.0",
+    "npm": "8.19.2"
   },
   "keywords": [],
   "author": "",
