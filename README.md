@@ -1,5 +1,11 @@
 # YelpCamp
+### Address:
 https://yelpcampbychristoffel.fly.dev/
+## Description
+- Created an Express framework-based website where people can share and fetch campgrounds information;
+- Mainly employed AJAX technology, and RESTful APIs to handle HTTP requests;
+- Provided the geolocation feature for users to view campgrounds by using Google Map API. 
+- Deployed a web service in Fly to make application scalable and maintainable  
 ## Home
 <img width="1470" alt="image" src="https://user-images.githubusercontent.com/39005000/212005014-a5f8b84c-b938-42c7-aa8e-989c1837b4f1.png">
 
